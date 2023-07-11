@@ -12,10 +12,8 @@ import (
 var controller *controllers.BucketsController
 
 func init() {
-	// get s3 client
 	s3Client := config.GetS3Client()
 	tpl := template.Must(template.ParseGlob("templates/*.gohtml"))
-	// create controller
 	controller = controllers.NewBucketsController(s3Client, tpl)
 }
 
