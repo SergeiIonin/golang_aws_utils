@@ -5,9 +5,11 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,10 +23,6 @@ func NewBucketsController(client *s3.Client, tpl *template.Template) *BucketsCon
 		s3Client: client,
 		tpl:      tpl,
 	}
-}
-
-type Bucket struct {
-	Name string
 }
 
 // ListBuckets lists all buckets in the s3 client and return an html page
@@ -42,18 +40,46 @@ func (bc *BucketsController) ListBuckets(c *gin.Context) {
 		return
 	}
 
-	buckets := make([]Bucket, len(result.Buckets))
-	for i, b := range result.Buckets {
-		buckets[i] = Bucket{
-			Name: aws.ToString(b.Name),
-		}
-	}
-
-	err = bc.tpl.ExecuteTemplate(c.Writer, "buckets.gohtml", buckets)
+	err = bc.tpl.ExecuteTemplate(c.Writer, "buckets.gohtml", result)
 	if err != nil {
 		log.Fatal(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err,
 		})
 	}
+}
+
+type S3FileInfo struct {
+	Key          string
+	LastModified *time.Time
+	Size         int64
+}
+
+func (bc *BucketsController) ListObjectsOfBucket(c *gin.Context) {
+	bucketName := c.Query("name")
+	ctx := context.TODO()
+	input := &s3.ListObjectsV2Input{
+		Bucket: aws.String(bucketName),
+	}
+
+	result, err := bc.s3Client.ListObjectsV2(ctx, input)
+
+	// if 301 is returned, most likely is that the bucket belongs to other region
+	if err != nil {
+		c.Error(err)
+		c.Errors.JSON()
+		c.Writer.WriteHeader(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, c.Errors.Errors())
+		log.Print(err)
+		return
+	}
+
+	fileInfo := S3FileInfo{
+		Key:          aws.ToString(result.Contents[0].Key),
+		LastModified: result.Contents[0].LastModified,
+		Size:         result.Contents[0].Size,
+	}
+
+	c.JSON(http.StatusOK, fileInfo)
+
 }

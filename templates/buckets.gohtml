@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Buckets</title>
+<p>Owner {{.Owner.DisplayName}}</p>
 <ul>
-{{range .}}
+{{range .Buckets}}
     <li>{{.Name}}</li>
 {{end}}
 </ul>
