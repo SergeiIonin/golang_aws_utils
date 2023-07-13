@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Upload File to S3</title>
+</head>
+<body>
+  <h2>Dropdown List</h2>
+  <form action="/buckets/upload" method="post" enctype="multipart/form-data">
+    <label for="Buckets">Choose a bucket:</label>
+    <select id="bucket" name="bucket">
+        {{range .Buckets}}
+            <option value={{.Name}}>{{.Name}}</option>
+        {{end}}
+    </select>
+    <br><br>
+    <input type="file" name="file" id="file">
+    <br><br>
+    <input type="submit" value="Upload File">
+  </form>
+  <!--form action is /upload, method "post" with query parameter "bucket", value for bucket is taken from other form with name "bucket"
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" id="file">
+    <br><br>
+    <input type="submit" value="Upload File">
+  </form>-->
+</body>
+</html>

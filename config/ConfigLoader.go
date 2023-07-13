@@ -12,7 +12,7 @@ func GetS3Client() *s3.Client {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 
 	if err != nil {
-		log.Fatal(err) // this should be propagated to http error
+		log.Fatal(err) // todo this should be propagated to http error
 	}
 
 	return s3.NewFromConfig(cfg)
