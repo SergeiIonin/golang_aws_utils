@@ -1,9 +1,8 @@
 package main
 
 import (
-	"GoAWSs3Utils/config"
-	"GoAWSs3Utils/controllers"
-
+	"GoAWSs3Utils/s3/config"
+	"GoAWSs3Utils/s3/controllers"
 	"html/template"
 
 	"github.com/gin-gonic/gin"
