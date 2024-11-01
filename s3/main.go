@@ -8,15 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var controller *controllers.BucketsController
-
-func init() {
+func main() {
 	s3Client := config.GetS3Client()
 	tpl := template.Must(template.ParseGlob("templates/*.html"))
-	controller = controllers.NewBucketsController(s3Client, tpl)
-}
+	controller := controllers.NewBucketsController(s3Client, tpl)
 
-func main() {
 	router := gin.Default()
 	router.GET("/buckets", controller.ListBuckets)
 	router.GET("/buckets/objects", controller.ListObjectsOfBucket)

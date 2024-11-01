@@ -16,5 +16,4 @@ func GetS3Client() *s3.Client {
 	}
 
 	return s3.NewFromConfig(cfg)
-
 }

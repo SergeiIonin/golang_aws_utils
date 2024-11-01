@@ -62,10 +62,9 @@ func (bc *BucketsController) ListObjectsOfBucket(c *gin.Context) {
 		Bucket: aws.String(bucketName),
 	}
 
-	result, err := bc.s3Client.ListObjectsV2(ctx, input)
+	result, err := bc.s3Client.ListObjectsV2(ctx, input) // todo which context should we pass?
 
-	// if 301 is returned, most likely is that the bucket belongs to other region
-	if err != nil {
+	if err != nil { // if 301 is returned, most likely is that the bucket belongs to other region
 		c.Error(err)
 		c.JSON(http.StatusBadRequest, c.Errors.Errors())
 		log.Print(err)
