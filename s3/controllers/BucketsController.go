@@ -10,9 +10,8 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/google/uuid"
-
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type BucketsController struct {
@@ -37,6 +36,7 @@ func (bc *BucketsController) ListBuckets(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err,
 		})
+
 		return
 	}
 
@@ -63,11 +63,10 @@ func (bc *BucketsController) ListObjectsOfBucket(c *gin.Context) {
 	}
 
 	result, err := bc.s3Client.ListObjectsV2(ctx, input) // todo which context should we pass?
-
-	if err != nil { // if 301 is returned, most likely is that the bucket belongs to other region
-		c.Error(err)
-		c.JSON(http.StatusBadRequest, c.Errors.Errors())
+	if err != nil {                                      // if 301 is returned, the bucket is probably in other region
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		log.Print(err)
+
 		return
 	}
 
@@ -91,6 +90,7 @@ func (bc *BucketsController) UploadFile(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err,
 		})
+
 		return
 	}
 
@@ -107,15 +107,15 @@ func (bc *BucketsController) Upload(c *gin.Context) {
 	bucketName := c.PostForm("bucket")
 	fileHeader, err := c.FormFile("file")
 	if err != nil {
-		c.Error(err)
-		c.JSON(http.StatusBadRequest, c.Errors.JSON())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
 		return
 	}
 	fileName := uuid.NewString()
 	file, err := fileHeader.Open()
 	if err != nil {
-		c.Error(err)
-		c.JSON(http.StatusBadRequest, c.Errors.JSON())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
 		return
 	}
 	ctx := context.TODO()
@@ -128,9 +128,9 @@ func (bc *BucketsController) Upload(c *gin.Context) {
 
 	_, err = bc.s3Client.PutObject(ctx, input)
 	if err != nil {
-		c.Error(err)
 		log.Print(err)
-		c.JSON(http.StatusInternalServerError, c.Errors.JSON())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{
